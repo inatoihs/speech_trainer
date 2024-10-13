@@ -13,12 +13,13 @@ def calculate_average_volume(audio_data: np.ndarray) -> float:
     return rms_to_db_with_reference(average_rms)
 
 
-def calculate_speaking_rate(audio_data: np.ndarray, sr: int) -> float:
+def calculate_speaking_rate(audio_data: np.ndarray, sr: int, text_length: int) -> float:
     non_silent_intervals: np.ndarray = librosa.effects.split(audio_data, top_db=20)
     total_speech_duration: float = (
         sum((end - start) for start, end in non_silent_intervals) / sr
     )
-    text_length: int = 100  # 仮の文字数
+    #text_length: int = 100  # 仮の文字数
+    print(text_length)
     return text_length / total_speech_duration if total_speech_duration > 0 else 0
 
 
