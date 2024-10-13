@@ -17,8 +17,8 @@ function Recorder({ onComplete }: RecorderProps) {
       <Button variant="contained" color="secondary" onClick={stopRecording} disabled={!isRecording}>
         会話終了
       </Button>
-      <Typography variant="h6">現在の音量: {volume.toFixed(2)} dB</Typography>
-      <LinearProgress variant="determinate" value={Math.min(100, (volume + 100) / 2)} />
+      <Typography variant="h6">現在の音量:</Typography>
+      <LinearProgress variant="determinate" value={Math.min(100, volume)} />
     </div>
   );
 }
