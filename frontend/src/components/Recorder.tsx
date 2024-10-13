@@ -10,8 +10,16 @@ function Recorder({ onComplete }: RecorderProps) {
 
   return (
     <div>
-      この文章を読み上げよう！
+      
       <br></br>
+
+      <Typography variant="h4">音声フィードバックシステム</Typography>
+      <br></br>
+      <Typography variant="h4">
+        この文章を読み上げよう！
+      </Typography>
+      
+
       けんせつぎょうおおてのはらぐろけんせつが
       さいたまけんないのとちのばいばいなどをめぐって
       ほうじんぜいすうせんまんえんをだつぜいしたうたがいがつよまり、
@@ -27,7 +35,7 @@ function Recorder({ onComplete }: RecorderProps) {
       さいたまけんちじのじっかも
       かたくそうさくのたいしょうとなっています。
 
-      <Typography variant="h4">音声フィードバックシステム</Typography>
+
       <Button variant="contained" color="primary" onClick={startRecording} disabled={isRecording}>
         会話開始
       </Button>

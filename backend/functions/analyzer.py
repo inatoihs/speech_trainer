@@ -18,8 +18,6 @@ def calculate_speaking_rate(audio_data: np.ndarray, sr: int, text_length: int) -
     total_speech_duration: float = (
         sum((end - start) for start, end in non_silent_intervals) / sr
     )
-    #text_length: int = 100  # 仮の文字数
-    print(text_length)
     return text_length / total_speech_duration if total_speech_duration > 0 else 0
 
 

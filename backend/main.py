@@ -46,7 +46,7 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
 
     average_volume: float = calculate_average_volume(audio_data)
     #読み上げる文章を原稿にする
-    genkou="""けんせつぎょうおおてのはらぐろけんせつが
+    manuscript="""けんせつぎょうおおてのはらぐろけんせつが
       さいたまけんないのとちのばいばいなどをめぐって
       ほうじんぜいすうせんまんえんをだつぜいしたうたがいがつよまり、
       とうきょうちけん とくそうぶなどはきょう、
@@ -61,7 +61,7 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
       さいたまけんちじのじっかも
       かたくそうさくのたいしょうとなっています。"""
 
-    speaking_rate: float = calculate_speaking_rate(audio_data, sr, len(genkou))
+    speaking_rate: float = calculate_speaking_rate(audio_data, sr, len(manuscript))
     pitch_mean: float
     tone: str
     pitch_mean, tone = analyze_pitch(audio_data, sr)
