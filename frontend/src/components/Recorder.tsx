@@ -19,7 +19,7 @@ function Recorder({ onComplete }: RecorderProps) {
         この文章を読み上げよう！
       </Typography>
       
-
+      <Typography variant="h6">
       けんせつぎょうおおてのはらぐろけんせつが
       さいたまけんないのとちのばいばいなどをめぐって
       ほうじんぜいすうせんまんえんをだつぜいしたうたがいがつよまり、
@@ -34,6 +34,7 @@ function Recorder({ onComplete }: RecorderProps) {
       またかんけいさきとしてあくいけんと
       さいたまけんちじのじっかも
       かたくそうさくのたいしょうとなっています。
+      </Typography>
 
 
       <Button variant="contained" color="primary" onClick={startRecording} disabled={isRecording}>
