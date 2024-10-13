@@ -45,7 +45,23 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
     audio_data, sr = librosa.load(audio_bytes_wav, sr=None)
 
     average_volume: float = calculate_average_volume(audio_data)
-    speaking_rate: float = calculate_speaking_rate(audio_data, sr)
+    #読み上げる文章を原稿にする
+    manuscript="""けんせつぎょうおおてのはらぐろけんせつが
+      さいたまけんないのとちのばいばいなどをめぐって
+      ほうじんぜいすうせんまんえんをだつぜいしたうたがいがつよまり、
+      とうきょうちけん とくそうぶなどはきょう、
+      ぐんまけんたかさきしのほんしゃなどを
+      いっせいにかたくそうさくしました。
+
+      かたくそうさくをうけたのは
+      ほんしゃやあくとくきょういちしゃちょうのじたく、
+      とちとりひきさきのかいはつがいしゃ「かぶしきがいしゃうらがねしょうじ」
+      などすうしゃです。
+      またかんけいさきとしてあくいけんと
+      さいたまけんちじのじっかも
+      かたくそうさくのたいしょうとなっています。"""
+
+    speaking_rate: float = calculate_speaking_rate(audio_data, sr, len(manuscript))
     pitch_mean: float
     tone: str
     pitch_mean, tone = analyze_pitch(audio_data, sr)
