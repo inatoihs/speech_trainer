@@ -20,13 +20,13 @@ function Recorder({ onComplete }: RecorderProps) {
           この文章を読み上げよう！
         </Typography>
         <Box sx={{ my: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-          <Typography variant="body1" paragraph>
-            建設業大手の腹黒(はらぐろ)建設が埼玉県内の土地の売買などをめぐって法人税数千万円を脱税した疑いが強まり、東京地検特捜部などはきょう、群馬県高崎市の本社などを一斉に家宅捜索しました。
+          <Typography component="div">
+            建設業大手の腹黒(はらぐろ)建設が埼玉県内の土地の売買などをめぐって法人税数千万円を脱税した疑いが強まり、東京地検 特捜部などはきょう、群馬県高崎市の本社などを一斉に家宅捜索しました。
           </Typography>
-          <Typography variant="body1" paragraph>
+          <Typography component="div">
             家宅捜索を受けたのは本社や悪徳(あくとく)狂一(きょういち)社長の自宅、土地取引先の開発会社「株式会社裏金商事」など数社です。
           </Typography>
-          <Typography variant="body1">
+          <Typography component="div">
             また関係先として悪井(あくい)嫌人(けんと)埼玉県知事の実家も家宅捜索の対象となっています。
           </Typography>
         </Box>
