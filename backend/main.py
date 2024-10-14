@@ -14,7 +14,6 @@ import io
 
 app = FastAPI()
 
-# CORS設定
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,7 +23,6 @@ app.add_middleware(
 )
 
 
-# Pydanticのレスポンスモデル定義
 class AnalysisResult(BaseModel):
     average_volume: float
     speaking_rate: float
@@ -45,23 +43,34 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
     audio_data, sr = librosa.load(audio_bytes_wav, sr=None)
 
     average_volume: float = calculate_average_volume(audio_data)
-    #読み上げる文章を原稿にする
-    manuscript="""けんせつぎょうおおてのはらぐろけんせつが
-      さいたまけんないのとちのばいばいなどをめぐって
-      ほうじんぜいすうせんまんえんをだつぜいしたうたがいがつよまり、
-      とうきょうちけん とくそうぶなどはきょう、
-      ぐんまけんたかさきしのほんしゃなどを
-      いっせいにかたくそうさくしました。
+    # TODO: ここで音声データからテキストを抽出して、その長さをtext_lengthに代入する
+    # もしくはテキストを動的に変更する
+    manuscript = """建設業大手の腹黒建設が
+      埼玉県内の土地の売買などをめぐって
+      法人税数千万円を脱税した疑いが強まり、
+      東京地検 特捜部などはきょう、
+      群馬県高崎市の本社などを
+      一斉に家宅捜索しました。
 
-      かたくそうさくをうけたのは
-      ほんしゃやあくとくきょういちしゃちょうのじたく、
-      とちとりひきさきのかいはつがいしゃ「かぶしきがいしゃうらがねしょうじ」
-      などすうしゃです。
-      またかんけいさきとしてあくいけんと
-      さいたまけんちじのじっかも
-      かたくそうさくのたいしょうとなっています。"""
+      家宅捜索を受けたのは
+      本社や悪徳狂一社長の自宅、
+      土地取引先の開発会社「株式会社裏金商事」
+      な ど数社です。
+      また関係先として悪井嫌人
+      埼玉県知事の実家も
+      家宅捜索の対象となっています。"""
 
-    speaking_rate: float = calculate_speaking_rate(audio_data, sr, len(manuscript))
+    manuscript_length = len(
+        manuscript.replace("\n", "")
+        .replace(" ", "")
+        .replace("、", "")
+        .replace("。", "")
+        .replace("「", "")
+        .replace("」", "")
+    )
+    print(manuscript_length)
+
+    speaking_rate: float = calculate_speaking_rate(audio_data, sr, manuscript_length)
     pitch_mean: float
     tone: str
     pitch_mean, tone = analyze_pitch(audio_data, sr)

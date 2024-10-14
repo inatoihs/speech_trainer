@@ -14,11 +14,8 @@ def calculate_average_volume(audio_data: np.ndarray) -> float:
 
 
 def calculate_speaking_rate(audio_data: np.ndarray, sr: int, text_length: int) -> float:
-    non_silent_intervals: np.ndarray = librosa.effects.split(audio_data, top_db=20)
-    total_speech_duration: float = (
-        sum((end - start) for start, end in non_silent_intervals) / sr
-    )
-    return text_length / total_speech_duration if total_speech_duration > 0 else 0
+    total_speech_duration: float = len(audio_data) / sr
+    return 60 * text_length / total_speech_duration if total_speech_duration > 0 else 0
 
 
 def analyze_pitch(audio_data: np.ndarray, sr: int) -> Tuple[float, str]:
