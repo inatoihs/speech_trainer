@@ -11,7 +11,7 @@ export const useRecording = (onComplete: (data: any) => void) => {
 
     const { startRecording, stopRecording } = useMediaRecorder(async (audioBlob) => {
         const speakingEndTime = Date.now();
-        const totalDuration = (speakingEndTime - (speakingStartTime)) / 1000;
+        const totalDuration = (speakingEndTime - speakingStartTime) / 1000;
         setSpeakingDuration(totalDuration);
 
         const responseData = await postRecording(audioBlob, totalDuration);

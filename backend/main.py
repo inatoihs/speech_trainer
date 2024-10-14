@@ -1,16 +1,18 @@
+from fastapi import FastAPI, WebSocket, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from functions.analyzer import (
     calculate_average_volume,
-    calculate_speaking_rate,
     analyze_pitch,
+    calculate_speaking_rate,
 )
-from fastapi import FastAPI, File, UploadFile
-from fastapi.middleware.cors import CORSMiddleware
-from typing import Tuple
-from pydantic import BaseModel
-from pydub import AudioSegment
-import uvicorn
 import librosa
+from pydub import AudioSegment
+import traceback
 import io
+import uvicorn
+from typing import Optional
+
 
 app = FastAPI()
 
@@ -26,12 +28,54 @@ app.add_middleware(
 class AnalysisResult(BaseModel):
     average_volume: float
     speaking_rate: float
-    tone: str
     pitch_mean: float
+    tone: str
+
+
+class RealTimeUpdate(BaseModel):
+    volume: float
+
+
+@app.websocket("/ws/analyze")
+async def websocket_analyze(websocket: WebSocket) -> None:
+    await websocket.accept()
+    former_data: Optional[bytes] = None
+
+    while True:
+        try:
+            # TODO: ストリーミングで音声データを受け取るようにする。
+            # 現状でデータ結合せずに処理しようとすると、２番目以降のデータにヘッダーなどが含まれず、
+            # ヘッダーを追加したとしてもクラスターのファイルやポジションの整合性が取れないため、
+            # うまく処理できない。フロント側でのデータの送り方を変える必要があるかもしれない。
+            coming_data: bytes = await websocket.receive_bytes()
+            data: bytes = former_data + coming_data if former_data else coming_data
+
+            audio_segment: AudioSegment = AudioSegment.from_file(
+                io.BytesIO(data), format="webm"
+            )
+            audio_segment = audio_segment.set_channels(1)
+            audio_bytes_wav: io.BytesIO = io.BytesIO()
+            audio_segment.export(audio_bytes_wav, format="wav")
+            audio_bytes_wav.seek(0)
+
+            # TODO: offsetを使って開始時間を指定する。ループでiを増やしていくとか。
+            # 現状なぜかoffsetが効かないので調査が必要。
+            audio_data, sr = librosa.load(audio_bytes_wav, sr=None)
+            volume: float = calculate_average_volume(audio_data)
+
+            await websocket.send_json({"volume": float(volume % 10 * 10)})
+
+            former_data = data
+
+        except Exception as e:
+            await websocket.close()
+            error_message: str = traceback.format_exc()
+            print(f"An error occurred:\n{error_message}")
+            break
 
 
 @app.post("/analyze", response_model=AnalysisResult)
-async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
+async def analyze_complete(file: UploadFile = File(...)) -> AnalysisResult:
     audio_bytes: bytes = await file.read()
     audio_segment: AudioSegment = AudioSegment.from_file(
         io.BytesIO(audio_bytes), format="webm"
@@ -43,9 +87,8 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
     audio_data, sr = librosa.load(audio_bytes_wav, sr=None)
 
     average_volume: float = calculate_average_volume(audio_data)
-    # TODO: ここで音声データからテキストを抽出して、その長さをtext_lengthに代入する
-    # もしくはテキストを動的に変更する
-    manuscript = """建設業大手の腹黒建設が
+
+    manuscript: str = """建設業大手の腹黒建設が
       埼玉県内の土地の売買などをめぐって
       法人税数千万円を脱税した疑いが強まり、
       東京地検 特捜部などはきょう、
@@ -60,7 +103,7 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
       埼玉県知事の実家も
       家宅捜索の対象となっています。"""
 
-    manuscript_length = len(
+    manuscript_length: int = len(
         manuscript.replace("\n", "")
         .replace(" ", "")
         .replace("、", "")
@@ -68,7 +111,6 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
         .replace("「", "")
         .replace("」", "")
     )
-    print(manuscript_length)
 
     speaking_rate: float = calculate_speaking_rate(audio_data, sr, manuscript_length)
     pitch_mean: float
@@ -78,8 +120,8 @@ async def analyze(file: UploadFile = File(...)) -> AnalysisResult:
     return AnalysisResult(
         average_volume=average_volume,
         speaking_rate=speaking_rate,
-        tone=tone,
         pitch_mean=pitch_mean,
+        tone=tone,
     )
 
 

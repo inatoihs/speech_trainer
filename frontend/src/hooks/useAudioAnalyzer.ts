@@ -1,32 +1,29 @@
 import { useState, useRef } from 'react';
+import { startWebSocketConnection } from '../functions/api';
 
 export const useAudioAnalyzer = () => {
     const [volume, setVolume] = useState<number>(0);
-    const audioContextRef = useRef<AudioContext | null>(null);
+    const socketRef = useRef<any>(null);
 
     const startAnalyzing = (stream: MediaStream) => {
-        audioContextRef.current = new AudioContext();
-        const source = audioContextRef.current.createMediaStreamSource(stream);
-        const analyser = audioContextRef.current.createAnalyser();
-        analyser.fftSize = 32;
-        source.connect(analyser);
+        const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
 
-        const scriptProcessor = audioContextRef.current.createScriptProcessor(2048, 1, 1);
-        analyser.smoothingTimeConstant = 0;
-        analyser.connect(scriptProcessor);
-        scriptProcessor.connect(audioContextRef.current.destination);
+        mediaRecorder.ondataavailable = async (event) => {
+            if (event.data.size > 0 && socketRef.current) {
+                const arrayBuffer = await event.data.arrayBuffer();
+                socketRef.current.send(arrayBuffer);
+            }
+        };
 
-        scriptProcessor.addEventListener('audioprocess', function () {
-            const array = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(array);
-            const arraySum = array.reduce((a, value) => a + value, 0);
-            const average = arraySum / array.length;
-            setVolume(Math.round(average));
+        mediaRecorder.start(100); // 100msごとにデータを送信
+
+        socketRef.current = startWebSocketConnection((data) => {
+            setVolume(data.volume);
         });
     };
 
     const stopAnalyzing = () => {
-        audioContextRef.current?.close();
+        socketRef.current?.close();
     };
 
     return {

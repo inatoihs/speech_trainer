@@ -7,7 +7,9 @@ def rms_to_db_with_reference(rms_value: float) -> float:
     return 20 * np.log10(rms_value + 1e-6)
 
 
-def calculate_average_volume(audio_data: np.ndarray) -> float:
+def calculate_average_volume(
+    audio_data: np.ndarray,
+) -> float:  # TODO: 音量ちゃんと計算する
     rms: np.ndarray = librosa.feature.rms(y=audio_data)[0]
     average_rms: float = np.mean(rms)
     return rms_to_db_with_reference(average_rms)
