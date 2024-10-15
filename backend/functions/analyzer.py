@@ -4,15 +4,16 @@ import librosa
 
 
 def rms_to_db_with_reference(rms_value: float) -> float:
-    return 20 * np.log10(rms_value + 1e-6)
+    return 20 * np.log10(rms_value + 1e-8)
 
 
 def calculate_average_volume(
     audio_data: np.ndarray,
-) -> float:  # TODO: 音量ちゃんと計算する
+) -> float:
+    # TODO: ちゃんとしたvolumeの計算。現状volumeは負の値になる（一般にデジタル信号では0がマックス）
     rms: np.ndarray = librosa.feature.rms(y=audio_data)[0]
     average_rms: float = np.mean(rms)
-    return rms_to_db_with_reference(average_rms)
+    return rms_to_db_with_reference(average_rms) + 70
 
 
 def calculate_speaking_rate(audio_data: np.ndarray, sr: int, text_length: int) -> float:
@@ -21,6 +22,7 @@ def calculate_speaking_rate(audio_data: np.ndarray, sr: int, text_length: int) -
 
 
 def analyze_pitch(audio_data: np.ndarray, sr: int) -> Tuple[float, str]:
+    # TODO: ちゃんとしたpitchの計算
     pitches: np.ndarray
     magnitudes: np.ndarray
     pitches, magnitudes = librosa.piptrack(y=audio_data, sr=sr)

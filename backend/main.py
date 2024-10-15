@@ -40,10 +40,11 @@ class RealTimeUpdate(BaseModel):
 async def websocket_analyze(websocket: WebSocket) -> None:
     await websocket.accept()
     former_data: Optional[bytes] = None
+    i = 0
 
     while True:
         try:
-            # TODO: ストリーミングで音声データを受け取るようにする。
+            # TODO: 小さいチャンクで音声データを処理できるようにしたい。
             # 現状でデータ結合せずに処理しようとすると、２番目以降のデータにヘッダーなどが含まれず、
             # ヘッダーを追加したとしてもクラスターのファイルやポジションの整合性が取れないため、
             # うまく処理できない。フロント側でのデータの送り方を変える必要があるかもしれない。
@@ -56,18 +57,22 @@ async def websocket_analyze(websocket: WebSocket) -> None:
             audio_segment = audio_segment.set_channels(1)
             audio_bytes_wav: io.BytesIO = io.BytesIO()
             audio_segment.export(audio_bytes_wav, format="wav")
-            audio_bytes_wav.seek(0)
 
-            # TODO: offsetを使って開始時間を指定する。ループでiを増やしていくとか。
-            # 現状なぜかoffsetが効かないので調査が必要。
-            audio_data, sr = librosa.load(audio_bytes_wav, sr=None)
+            audio_data, sr = librosa.load(
+                audio_bytes_wav, sr=None, offset=max(0, i / 10 - 0.09)
+            )
             volume: float = calculate_average_volume(audio_data)
 
-            await websocket.send_json({"volume": float(volume % 10 * 10)})
+            await websocket.send_json({"volume": float(volume)})
 
             former_data = data
+            i += 1
 
         except Exception as e:
+            # データ送信の頻度が高い時、最初のチャンクにヘッダーが収まらないことがあるため、その場合は再度データを受け取る
+            if not former_data:
+                former_data = data
+                continue
             await websocket.close()
             error_message: str = traceback.format_exc()
             print(f"An error occurred:\n{error_message}")
@@ -83,7 +88,6 @@ async def analyze_complete(file: UploadFile = File(...)) -> AnalysisResult:
     audio_segment = audio_segment.set_channels(1)
     audio_bytes_wav: io.BytesIO = io.BytesIO()
     audio_segment.export(audio_bytes_wav, format="wav")
-    audio_bytes_wav.seek(0)
     audio_data, sr = librosa.load(audio_bytes_wav, sr=None)
 
     average_volume: float = calculate_average_volume(audio_data)
