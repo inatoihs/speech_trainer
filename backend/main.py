@@ -32,10 +32,6 @@ class AnalysisResult(BaseModel):
     tone: str
 
 
-class RealTimeUpdate(BaseModel):
-    volume: float
-
-
 @app.websocket("/ws/analyze")
 async def websocket_analyze(websocket: WebSocket) -> None:
     await websocket.accept()
