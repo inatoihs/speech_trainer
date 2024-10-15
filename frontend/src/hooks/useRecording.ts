@@ -7,7 +7,6 @@ export const useRecording = (onComplete: (data: any) => void) => {
     const [isRecording, setIsRecording] = useState(false);
     const [speakingStartTime, setSpeakingStartTime] = useState<number>(0);
     const [speakingDuration, setSpeakingDuration] = useState<number>(0);
-    const [, setStream] = useState<MediaStream | null>(null);
 
     const { startRecording, stopRecording } = useMediaRecorder(async (audioBlob) => {
         const speakingEndTime = Date.now();
@@ -22,7 +21,6 @@ export const useRecording = (onComplete: (data: any) => void) => {
 
     const handleStartRecording = async () => {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        setStream(stream);
         setSpeakingStartTime(Date.now());
         setIsRecording(true);
 
