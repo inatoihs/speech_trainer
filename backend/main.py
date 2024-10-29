@@ -41,11 +41,19 @@ class AnalysisResult(BaseModel):
 
 
 def evaluate_articulation(audio_data: np.ndarray, sr: int) -> float:
-    # オンセット強度を計算
-    onset_env = librosa.onset.onset_strength(y=audio_data, sr=sr)
+    # 音素の持続時間を計算
+    hop_length = 512
+    onset_frames = librosa.onset.onset_detect(y=audio_data, sr=sr, hop_length=hop_length)
+    onset_times = librosa.frames_to_time(onset_frames, sr=sr, hop_length=hop_length)
     
-    # オンセット強度の平均を滑舌スコアとして返す
-    articulation_score = np.mean(onset_env)
+    # 音素の持続時間の平均を滑舌スコアとして返す
+    durations = np.diff(onset_times)
+    articulation_score = np.mean(durations)
+    
+    # NaN チェック
+    if np.isnan(articulation_score):
+        articulation_score = 0.0  # デフォルト値を設定
+    
     
     return articulation_score
 
