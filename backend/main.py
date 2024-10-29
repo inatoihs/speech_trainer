@@ -36,6 +36,8 @@ class AnalysisResult(BaseModel):
     speaking_rate: float
     pitch_mean: float
     tone: str
+    articulation_score: float  # 新しいフィールドを追加
+    
 
 
 def evaluate_articulation(audio_data: np.ndarray, sr: int) -> float:
@@ -138,6 +140,9 @@ async def analyze_complete(file: UploadFile = File(...)) -> AnalysisResult:
     articulation_score = evaluate_articulation(audio_data, sr)
 
 
+    print("kuwakuwa")
+    print(articulation_score)
+    
     return AnalysisResult(
         average_volume=average_volume,
         speaking_rate=speaking_rate,
