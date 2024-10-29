@@ -7,8 +7,8 @@ interface FeedbackProps {
 }
 
 function Feedback({ data, onBack }: FeedbackProps) {
-  const { average_volume, speaking_rate, tone, speaking_duration } = data;
-
+  const { average_volume, speaking_rate, tone, speaking_duration,articulation_score } = data;
+  
   const getSpeakingRateColor = (rate: number) => {
     if (rate >= 270 && rate <= 330) return 'success';
     if ((rate >= 240 && rate < 270) || (rate > 330 && rate <= 360)) return 'warning';
@@ -77,6 +77,11 @@ function Feedback({ data, onBack }: FeedbackProps) {
               話した時間: {speaking_duration.toFixed(2)} 秒
             </Typography>
           </Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="h6">
+                滑舌評価スコア: {articulation_score!== null && articulation_score!== undefined  ? articulation_score.toFixed(2) : 'N/A'}
+            </Typography>
+        </Box>
         </Box>
         <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
           <Button variant="contained" onClick={onBack} size="large">

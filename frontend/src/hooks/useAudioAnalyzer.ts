@@ -3,6 +3,7 @@ import { startWebSocketConnection } from '../functions/api';
 
 export const useAudioAnalyzer = () => {
     const [volume, setVolume] = useState<number>(0);
+    const [articulationScore, setArticulationScore] = useState<number | null>(null);
     const socketRef = useRef<any>(null);
 
     const startAnalyzing = (stream: MediaStream) => {
@@ -19,6 +20,7 @@ export const useAudioAnalyzer = () => {
 
         socketRef.current = startWebSocketConnection((data) => {
             setVolume(data.volume);
+            setArticulationScore(data.articulation_score); // 滑舌の評価値を設定
         });
     };
 
@@ -28,6 +30,7 @@ export const useAudioAnalyzer = () => {
 
     return {
         volume,
+        articulationScore,
         startAnalyzing,
         stopAnalyzing,
     };

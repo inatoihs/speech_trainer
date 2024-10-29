@@ -13,6 +13,12 @@ import io
 import uvicorn
 from typing import Optional
 
+import io
+from fastapi import FastAPI, WebSocket, UploadFile, File
+from pydub import AudioSegment
+import librosa
+import numpy as np
+
 
 app = FastAPI()
 
@@ -30,6 +36,12 @@ class AnalysisResult(BaseModel):
     speaking_rate: float
     pitch_mean: float
     tone: str
+
+
+def evaluate_articulation(audio_data: np.ndarray, sr: int) -> float:
+    # 滑舌の評価ロジックをここに実装
+    # 例: 音素の持続時間や周波数成分を解析してスコアを計算
+    return np.random.rand()  # ダミーのスコアを返す
 
 
 @app.websocket("/ws/analyze")
@@ -58,8 +70,13 @@ async def websocket_analyze(websocket: WebSocket) -> None:
                 audio_bytes_wav, sr=None, offset=max(0, i / 10 - 0.09)
             )
             volume: float = calculate_average_volume(audio_data)
+            
+            # 滑舌の評価を行う関数を呼び出す
+            articulation_score = evaluate_articulation(audio_data, sr)
 
-            await websocket.send_json({"volume": float(volume)})
+
+            await websocket.send_json({"volume": float(volume), "articulation_score": articulation_score})
+
 
             former_data = data
             i += 1
@@ -116,12 +133,17 @@ async def analyze_complete(file: UploadFile = File(...)) -> AnalysisResult:
     pitch_mean: float
     tone: str
     pitch_mean, tone = analyze_pitch(audio_data, sr)
+    
+    # 滑舌の評価を行う関数を呼び出す
+    articulation_score = evaluate_articulation(audio_data, sr)
+
 
     return AnalysisResult(
         average_volume=average_volume,
         speaking_rate=speaking_rate,
         pitch_mean=pitch_mean,
         tone=tone,
+        articulation_score=articulation_score  # 新しいフィールドを追加
     )
 
 
