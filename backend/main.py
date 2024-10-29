@@ -41,9 +41,13 @@ class AnalysisResult(BaseModel):
 
 
 def evaluate_articulation(audio_data: np.ndarray, sr: int) -> float:
-    # 滑舌の評価ロジックをここに実装
-    # 例: 音素の持続時間や周波数成分を解析してスコアを計算
-    return np.random.rand()  # ダミーのスコアを返す
+    # オンセット強度を計算
+    onset_env = librosa.onset.onset_strength(y=audio_data, sr=sr)
+    
+    # オンセット強度の平均を滑舌スコアとして返す
+    articulation_score = np.mean(onset_env)
+    
+    return articulation_score
 
 
 @app.websocket("/ws/analyze")
